@@ -1,5 +1,5 @@
 [package]
-name = "logx"
+name = "logo"
 version = "0.1.0"
 edition = "2021"
 description = "init log env quickly"

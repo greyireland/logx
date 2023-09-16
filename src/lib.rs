@@ -21,11 +21,8 @@ pub fn init_prod() {
         dir.to_str().unwrap(),
         file_name.unwrap_or_default().to_str().unwrap()
     );
-    let _writer = FileAppender::rotate_with_expire(
-        p,
-        Period::Day,
-        ftlog::appender::Duration::weeks(1),
-    );
+    let _writer =
+        FileAppender::rotate_with_expire(p, Period::Day, ftlog::appender::Duration::weeks(1));
     ftlog::Builder::new()
         .root(_writer)
         .format(SimpleFormatter)
@@ -41,4 +38,3 @@ pub fn init_debug() {
         .try_init()
         .unwrap();
 }
-

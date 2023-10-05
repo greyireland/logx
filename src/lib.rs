@@ -1,40 +1,38 @@
-use std::env;
-use std::path::Path;
+use std::{env, io};
 
-use ::log::LevelFilter;
-use ftlog::appender::{FileAppender, Period};
+use tracing::Level;
+use tracing_appender::non_blocking::WorkerGuard;
 
-use crate::log::SimpleFormatter;
-
-pub mod log;
-
-pub fn init_prod() {
+pub fn init_prod() -> WorkerGuard {
     let args: Vec<String> = env::args().collect();
     let p = std::path::Path::new(&args[0]);
-    let file_name = p.file_name();
-    let dir = Path::new("logs");
-    if !dir.exists() {
-        std::fs::create_dir_all(&dir).unwrap();
-    }
-    let p = format!(
-        "{}/{}.log",
-        dir.to_str().unwrap(),
-        file_name.unwrap_or_default().to_str().unwrap()
+    let file_name = format!(
+        "{}.log",
+        p.file_name().unwrap_or_default().to_str().unwrap()
     );
-    let _writer =
-        FileAppender::rotate_with_expire(p, Period::Day, ftlog::appender::Duration::weeks(1));
-    ftlog::Builder::new()
-        .root(_writer)
-        .format(SimpleFormatter)
-        .max_log_level(LevelFilter::Info)
-        .try_init()
-        .unwrap();
+    let file_appender = tracing_appender::rolling::daily("./logs/", file_name);
+    let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
+    tracing_subscriber::fmt()
+        .with_writer(non_blocking)
+        .with_ansi(true)
+        .with_target(false)
+        .with_level(true)
+        .with_line_number(false)
+        .with_thread_names(false)
+        .with_max_level(Level::INFO)
+        .init();
+    guard
 }
 
 pub fn init_debug() {
-    ftlog::Builder::new()
-        .format(SimpleFormatter)
-        .max_log_level(LevelFilter::Debug)
-        .try_init()
-        .unwrap();
+    tracing_subscriber::fmt()
+        .with_writer(io::stderr)
+        .with_ansi(true)
+        .with_target(false)
+        .with_level(true)
+        .with_line_number(false)
+        .with_thread_names(false)
+        .with_max_level(Level::DEBUG)
+        .init();
 }
+

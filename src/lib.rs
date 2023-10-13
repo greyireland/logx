@@ -14,7 +14,7 @@ pub fn init_prod() -> WorkerGuard {
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
     tracing_subscriber::fmt()
         .with_writer(non_blocking)
-        .with_ansi(true)
+        .with_ansi(false)
         .with_target(false)
         .with_level(true)
         .with_line_number(false)

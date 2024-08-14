@@ -3,12 +3,12 @@ use std::path::Path;
 
 use ::log::LevelFilter;
 use ftlog::appender::{FileAppender, Period};
+use ftlog::LoggerGuard;
+use crate::fmt::SimpleFormatter;
 
-use crate::log::SimpleFormatter;
+pub mod fmt;
 
-pub mod log;
-
-pub fn init_prod() {
+pub fn init_prod() -> LoggerGuard {
     let args: Vec<String> = env::args().collect();
     let p = std::path::Path::new(&args[0]);
     let file_name = p.file_name();
@@ -28,7 +28,7 @@ pub fn init_prod() {
         .format(SimpleFormatter)
         .max_log_level(LevelFilter::Info)
         .try_init()
-        .unwrap();
+        .unwrap()
 }
 
 pub fn init_debug() {
